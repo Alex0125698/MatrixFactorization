@@ -1,0 +1,203 @@
+
+# Cmake is a cross-platform tool that automates the creation of 
+# build-systems. It generates a native build environment, for
+# example, makefiles on linux and Visual Studio projects on 
+# Windows. In other words, it provides a portable way of building
+# Projects. To Generate the Build system, install CMake and
+# open a terminal in the directory containing CMakeLists.txt 
+# Type the command: cmake .
+
+
+
+# ====== Required Boilerplate CMake commands ======
+
+# only use cmake --version >= 3.10
+cmake_minimum_required(VERSION 3.2)
+
+# project name (will be the name of the VS solution)
+# this causes cmake to detect and test the compiler
+# VERSION sets a bunch of variables; like MyProject_VERSION, PROJECT_VERSION
+project(MatrixFactorization VERSION 1.0 DESCRIPTION "Non-Negative Matrix Factorization" LANGUAGES CXX)
+
+
+
+# ====== Options (these will appear in cmake GUI) ======
+
+# option (USE_SOME_LIBRARY "Should we use the library" ON)
+
+# if (USE_SOME_LIBRARY)
+#     # do something
+#     message(STATUS "some message")
+
+# endif (USE_SOME_LIBRARY)
+
+# message(STATUS "CMAKE_SOURCE_DIR")
+# message(STATUS "${CMAKE_SOURCE_DIR}")
+# message(STATUS "CMAKE_BINARY_DIR")
+# message(STATUS "${CMAKE_BINARY_DIR}")
+# message(STATUS "EXECUTABLE_OUTPUT_PATH") 
+# message(STATUS "${EXECUTABLE_OUTPUT_PATH}")
+# message(STATUS "LIBRARY_OUTPUT_PATH")
+# message(STATUS "${LIBRARY_OUTPUT_PATH}")
+# message(STATUS "CMAKE_INSTALL_PREFIX")
+# message(STATUS "${CMAKE_INSTALL_PREFIX}")
+
+
+
+# ====== SET CMAKE GLOBAL VARIABLES ======
+
+# create a variable for the C++ Standard
+set(CMAKE_CXX_STANDARD 17)
+#
+# set(CMAKE_CXX_FLAGS "")
+#
+# set(CMAKE_CXX_COMPILER_ID "g++")
+# This is the directory where CMake was started
+set(CMAKE_SOURCE_DIR "${CMAKE_SOURCE_DIR}")
+# Set the output folder where your program will be created
+# which files???
+set(CMAKE_BINARY_DIR "${CMAKE_SOURCE_DIR}/bin")
+# Specify where CMake should put the executable files
+# .exe files ???
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+# Specify where CMake should put the libraries
+# .dll files ???
+set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+# not applicable for VS
+# set(CMAKE_BUILD_TYPE Release)
+#
+# Where the install() files go
+# set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+
+
+
+# ====== SET CUSTOM GLOBAL VARIABLES ======
+
+# create a variable for the executable name
+# will be the name of the VS project within the 'HelloCMake' solution
+set(EXEC_NAME mf)
+
+# puts all .cpp files inside src to the SOURCES variable
+# the file command allows for wildcards
+# THIS IS BAD PRACTISE SINCE MAKE WILL NOT KNOW IF CMAKE SHOUDL BE RERUN
+# file(GLOB SOURCES src/main.cpp)
+set(SOURCES "src/main.cpp" "include/Matrix.h" "include/sassert.h" "include/Timer.h" "include/Vector2.h")
+
+
+
+
+# ====== OBSOLETE CMAKE FEATURES ======
+
+# specify global include directories; added to all targets
+# include_directories(include)
+#
+# add_definitions()
+#
+# add_dependencies()
+# This will add compile options to every target (but not propagated to users of this library)
+# add_compile_options()
+
+
+
+# ====== FIND EXTERNAL LIBRARIES ======
+
+# find_package(Qt COMPONENTS QtOpenGL QtXml REQUIRED)
+
+# For this to work, you'll need to put the FindLibXML++.cmake file into
+# your CMake module path. Since CMake (currently) doesn't ship it, you'll
+# have to ship it within your project.
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+# you need to put the CMake modules that you use,
+# and that CMake has to find automatically, inside that folder.
+
+# will use Find<name>.cmake OR <name>Config.cmake to find the library
+# some Find<name>.cmake scripts are bundled with the cmake software
+# others may have to be downloaded
+# find_package(zlib REQUIRED)
+
+# embed another project in this project
+# opens the given folder and runs the CMakeLists.txt file inside
+# add_subdirectory(test)
+# add_subdirectory(zlib)
+
+# download library
+# FetchContent*()
+
+# old style
+# find_package(Boost REQUIRED COMPONENTS thread system)
+# include_directories(${Boost_INCLUDE_DIRS})
+# target_link_libraries(myLib ${Boost_THREAD_LIBRARY} ${Boost_SYSTEM_LIBRARY})
+
+# MODERN CMAKE
+# Boost::thread is a target, not a string
+# it will add dependencies automatically
+# target_link_libraries(myLib Boost::thread);
+
+# set_property(TARGET myLib PROPERTY OUTPUT_NAME "mylib$<CONFIG>")
+
+
+
+# ====== ADD MY LIBRARIES ======
+
+# A statically-linked library example
+# add_library(person STATIC include/Person.h src/Person.cpp)
+
+# A dynamically-linked / shared library example
+# add_library(person2 SHARED include/Person2.h src/Person2.cpp)
+# install(TARGETS person2 DESTINATION c:/libraries)
+
+# Libraries can be:
+# STATIC -> the library is compiled to a .lib (.so on linux) and incorporated into the final .exe
+# SHARED -> the library is compiled to a .dll (.a on linux) and loaded by the final .exe
+# INTERFACE -> a header-only library (no file is generated by the library)
+# MODULE ->
+
+
+
+# ====== ADD MY EXECUTABLES ======
+
+# Adds the hello executable. In VS, there will be a spearate project
+# for hello that allows the user to build hello.exe
+add_executable(${EXEC_NAME} ${SOURCES})
+# Populates INCLUDE_DIRECTORIES and INTERFACE_INCLUDE_DIRECTORIES
+# The directory will be searched for header files (uses -I compiler option)
+target_include_directories(${EXEC_NAME} PUBLIC include)
+# Populates COMPILE_DEFINITIONS and INTERFACE_COMPILE_DEFINITIONS
+# are these macros???
+# target_compile_definitions()
+# Populates COMPILE_OPTIONS and INTERFACE_COMPILE_OPTIONS
+#
+# target_compile_options(${EXEC_NAME} PRIVATE -Wall)
+
+# PRIVATE   -> only this target will add the options (only INCLUDE_DIRECTORIES populated)
+# INTERFACE -> anything using this target will add these options but the target itself 
+#              doesn't use the options (only INTERFACE_INCLUDE_DIRECTORIES populated)
+# PUBLIC    -> anything that uses ${EXEC_NAME} will also have these options added (both are populated)
+
+#
+# find_library(PERSON_LIBRARY_PATH person lib)
+# we can also link the .lib and .dll files directly
+# target_link_libraries(${EXEC_NAME} LINK_PUBLIC person)
+
+# a second executable
+# add_executable(secondExe "src/main2.cpp")
+
+
+
+# ====== ADD TESTS ======
+
+# include(CTest)
+
+# COMMAND points to executable (not including the Debug/Release folder, or the .exe)
+# if the program returns 0 then the test is passed
+# add_test(NAME "test1" COMMAND "${CMAKE_BINARY_DIR}/hello" "someParameter")
+
+# enable_testing()
+
+# add_test(NAME mytest COMMAND mytest --option)
+
+# install(TARGETS hello secondExe person2 DESTINATION "c:/libraries/HelloCMake" )
+# install(FILES src/Person.cpp DESTINATION "c:/libraries/HelloCMake" )
+
+# include(CPack)
+
